@@ -15,6 +15,8 @@ using namespace std;
 
 int aa_index (char aa);
 
+char index_aa (int aa);
+
 int to_int(char a);
 
 void char2num(vector<int> &, string &);

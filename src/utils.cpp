@@ -58,6 +58,34 @@ int aa_index(char aa) {
     }
 }
 
+char index_aa(int aa) {
+    switch (aa) {
+        case 0: return 'A';
+        case 1: return 'R';
+        case 2: return 'N';
+        case 3: return 'D';
+        case 4: return 'C';
+        case 5: return 'Q';
+        case 6: return 'E';
+        case 7: return 'G';
+        case 8: return 'H';
+        case 9: return 'M';
+        case 10: return 'I';
+        case 11: return 'L';
+        case 12: return 'K';
+        case 13: return 'F';
+        case 14: return 'P';
+        case 15: return 'S';
+        case 16: return 'T';
+        case 17: return 'W';
+        case 18: return 'Y';
+        case 19: return 'V';
+        default:
+            cout << (char)aa << " " << (int)aa << endl;
+            throw invalid_argument("inavlid bytecode");
+    }
+}
+
 int n_index(char n) {
     switch (n) {
         case 'A': return 0;
@@ -227,6 +255,11 @@ int to_int(char a) {
 
 void char2num(vector<int>& target, string & s) {
     for (int i = 0; i < (int)s.size(); ++i) {
+        // if (i % 3 == 0) {
+        //     cout << endl;
+        // }
+        // cout << s[i] << " ";
+        
         target[i] = to_int(s[i]);
     }
 }
@@ -366,9 +399,8 @@ vector<int> read_fasta(string & input, ostream& fout) {
 
 double evaluate_CAI(string & rna,vector<int> & protein,int type) {
     int l = int(rna.size());
-
+    cout << "eval" << endl;
 //    cout << rna << endl;
-
     vector<int> seq(l);
     char2num(seq, rna);
     double CAI;

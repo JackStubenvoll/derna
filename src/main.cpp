@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     string rna_file,swipe_output;
     string codon_file = {};
     string param_path = {};
-    int model = 1, mode = 1;
+    int model = 1, mode = 1, codonisolate = 0;
     double incr = inf, lambda = inf, threshold = 0.0025, threshold2 = 0.00075;
     int g = inf;
 
@@ -74,6 +74,11 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'p':
                         threshold2 = stod(argv[i+1]);
+                        break;
+                    case 'b':
+                        // controls whether or not to isolate first ten codons
+                        // only functionality is currently for zuker + mfe_cai
+                        codonisolate = std::stoi(argv[i+1]);
                         break;
                     default:
                         help();
@@ -218,31 +223,99 @@ int main(int argc, char *argv[]) {
 
     if (zuker && mfe_cai) {
         if (lambda == inf) throw invalid_argument("Invalid Value of lambda");
-        Zuker Z = Zuker(n,mode,protein);
-        fout << "lambda: " << lambda << endl;
-        double energy_cai = Z.calculate_CAI_O(fout, lambda);
+        if (!codonisolate) {
+            Zuker Z = Zuker(n,mode,protein);
+            fout << "lambda: " << lambda << endl;
+            double energy_cai = Z.calculate_CAI_O(fout, lambda);
 
-        Z.traceback_B2(lambda);
-        string zuker_cai_rna(3*n,'.'), zuker_cai_bp(3*n,'.');
-        string zuker_cai_rna_X(3*n, '.');
-        Z.get_rna_X(zuker_cai_rna_X);
-        Z.get_rna_cai(zuker_cai_rna);
-        Z.get_bp(zuker_cai_bp);
+            Z.traceback_B2(lambda);
+            string zuker_cai_rna(3*n,'.'), zuker_cai_bp(3*n,'.');
+            string zuker_cai_rna_X(3*n, '.');
+            Z.get_rna_X(zuker_cai_rna_X);
+            Z.get_rna_cai(zuker_cai_rna);
+            Z.get_bp(zuker_cai_bp);
 
 
-        int type = 0;
+            int type = 0;
 
-        double CAI_s = evaluate_CAI(zuker_cai_rna,protein,type);
-        double CAI = evaluate_CAI(zuker_cai_rna,protein,1);
-        double MFE = evaluate_MFE(zuker_cai_rna);
+            double CAI_s = evaluate_CAI(zuker_cai_rna,protein,type);
+            double CAI = evaluate_CAI(zuker_cai_rna,protein,1);
+            double MFE = evaluate_MFE(zuker_cai_rna);
 
-        cout << "lambda: " << lambda << ",O: " << energy_cai << ",cai: " << CAI << ",cai_s: " << CAI_s << ",mfe: " << MFE << ",combined: " << lambda*MFE+(lambda-1)*CAI << endl;
-        fout << "zuker cai bp: " << zuker_cai_bp << ",size: " << zuker_cai_bp.size() << endl;
-        fout << "zuker rna: " << zuker_cai_rna_X << ".size: " << zuker_cai_rna.size() << endl;
-        fout << "zuker cai rna: " << zuker_cai_rna << ".size: " << zuker_cai_rna.size() << endl;
+            cout << "lambda: " << lambda << ",O: " << energy_cai << ",cai: " << CAI << ",cai_s: " << CAI_s << ",mfe: " << MFE << ",combined: " << lambda*MFE+(lambda-1)*CAI << endl;
+            fout << "zuker cai bp: " << zuker_cai_bp << ",size: " << zuker_cai_bp.size() << endl;
+            fout << "zuker rna: " << zuker_cai_rna_X << ".size: " << zuker_cai_rna.size() << endl;
+            fout << "zuker cai rna: " << zuker_cai_rna << ".size: " << zuker_cai_rna.size() << endl;
 
-        fout << "Codon Adaptation Index: " << CAI_s << endl;
-        fout << "Minimum Free Energy: " << MFE/100 << endl;
+            fout << "Codon Adaptation Index: " << CAI_s << endl;
+            fout << "Minimum Free Energy: " << MFE/100 << endl;
+        } else if (codonisolate) {
+            // for (auto & i : protein) {
+            //     cout << i << " "; 
+            // }
+            vector<int> firstten(10);
+            for (int i = 0; i < 10; i++) {
+                firstten[i] = protein[i];
+            }
+            int newn = n-10;
+            vector<int> rest(newn);
+            for (int i = 10; i < n; i++) {
+                rest[i-10] = protein[i];
+            }
+            // copy(protein.begin(), protein.begin() + 10, firstten.begin());
+            // copy(protein.begin() + 10, protein.end(), rest.begin());
+            // std::cout << "firstten test" << std::endl;
+            // for (int i = 0; i < 10; i++) {
+            //     std::cout << firstten[i] << " ";
+            // }
+            // std::cout << std::endl;
+            // for (int i = 0; i < n - 10; i++) {
+            //     std::cout << index_aa(rest[i]) << " ";
+            // }
+            // for (auto & i : rest) {
+            //     cout << i << " "; 
+            // }
+            fout << "first ten amino acids: ";
+            for (auto & i : firstten) {
+                fout << index_aa(i);
+            }
+            fout << endl << "rest of amino acid sequence: ";
+            for (auto & i : rest) {
+                fout << index_aa(i); 
+            }
+            fout << endl;  
+            // Zuker Z = Zuker(n,mode,protein);
+            // Zuker Z1 = Zuker(10, mode, firstten);
+            Zuker Z2 = Zuker(newn, mode, rest);
+            
+            fout << "lambda: " << lambda << endl;
+            double energy_cai = Z2.calculate_CAI_O(fout, lambda);
+
+            Z2.traceback_B2(lambda);
+            string zuker_cai_rna(3*newn,'.'), zuker_cai_bp(3*newn,'.');
+            string zuker_cai_rna_X(3*newn, '.');
+            Z2.get_rna_X(zuker_cai_rna_X);
+            Z2.get_rna_cai(zuker_cai_rna);
+            Z2.get_bp(zuker_cai_bp);
+
+            cout << "cp 1" << endl;
+            int type = 0;
+
+            double CAI_s = evaluate_CAI(zuker_cai_rna,rest,type);
+            cout << "cp 2" << endl;
+            double CAI = evaluate_CAI(zuker_cai_rna,rest,1);
+            cout << "cp 3" << endl;
+            double MFE = evaluate_MFE(zuker_cai_rna);
+
+            cout << "lambda: " << lambda << ",O: " << energy_cai << ",cai: " << CAI << ",cai_s: " << CAI_s << ",mfe: " << MFE << ",combined: " << lambda*MFE+(lambda-1)*CAI << endl;
+            fout << "zuker cai bp: " << zuker_cai_bp << ",size: " << zuker_cai_bp.size() << endl;
+            fout << "zuker rna: " << zuker_cai_rna_X << ".size: " << zuker_cai_rna.size() << endl;
+            fout << "zuker cai rna: " << zuker_cai_rna << ".size: " << zuker_cai_rna.size() << endl;
+
+            fout << "Codon Adaptation Index: " << CAI_s << endl;
+            fout << "Minimum Free Energy: " << MFE/100 << endl;
+        }
+        
     }
 
     if (zuker && lambda_swipe) {
