@@ -399,7 +399,7 @@ vector<int> read_fasta(string & input, ostream& fout) {
 
 double evaluate_CAI(string & rna,vector<int> & protein,int type) {
     int l = int(rna.size());
-    cout << "eval" << endl;
+    // cout << "eval" << endl;
 //    cout << rna << endl;
     vector<int> seq(l);
     char2num(seq, rna);

@@ -285,35 +285,70 @@ int main(int argc, char *argv[]) {
             }
             fout << endl;  
             // Zuker Z = Zuker(n,mode,protein);
-            // Zuker Z1 = Zuker(10, mode, firstten);
+            Zuker Z1 = Zuker(10, mode, firstten);
             Zuker Z2 = Zuker(newn, mode, rest);
             
             fout << "lambda: " << lambda << endl;
-            double energy_cai = Z2.calculate_CAI_O(fout, lambda);
 
-            Z2.traceback_B2(lambda);
-            string zuker_cai_rna(3*newn,'.'), zuker_cai_bp(3*newn,'.');
-            string zuker_cai_rna_X(3*newn, '.');
-            Z2.get_rna_X(zuker_cai_rna_X);
-            Z2.get_rna_cai(zuker_cai_rna);
-            Z2.get_bp(zuker_cai_bp);
 
-            cout << "cp 1" << endl;
+            double energy_cai_1 = Z1.calculate_CAI_O(fout, lambda);
+
+            Z1.traceback_B2(lambda);
+            string zuker_cai_rna_1(3*10,'.'), zuker_cai_bp_1(3*10,'.');
+            string zuker_cai_rna_X_1(3*10, '.');
+            Z1.get_rna_X(zuker_cai_rna_X_1);
+            Z1.get_rna_cai(zuker_cai_rna_1);
+            Z1.get_bp(zuker_cai_bp_1);
+
             int type = 0;
 
-            double CAI_s = evaluate_CAI(zuker_cai_rna,rest,type);
-            cout << "cp 2" << endl;
-            double CAI = evaluate_CAI(zuker_cai_rna,rest,1);
-            cout << "cp 3" << endl;
-            double MFE = evaluate_MFE(zuker_cai_rna);
 
-            cout << "lambda: " << lambda << ",O: " << energy_cai << ",cai: " << CAI << ",cai_s: " << CAI_s << ",mfe: " << MFE << ",combined: " << lambda*MFE+(lambda-1)*CAI << endl;
-            fout << "zuker cai bp: " << zuker_cai_bp << ",size: " << zuker_cai_bp.size() << endl;
-            fout << "zuker rna: " << zuker_cai_rna_X << ".size: " << zuker_cai_rna.size() << endl;
-            fout << "zuker cai rna: " << zuker_cai_rna << ".size: " << zuker_cai_rna.size() << endl;
+            double energy_cai_2 = Z2.calculate_CAI_O(fout, lambda);
 
-            fout << "Codon Adaptation Index: " << CAI_s << endl;
-            fout << "Minimum Free Energy: " << MFE/100 << endl;
+            Z2.traceback_B2(lambda);
+            string zuker_cai_rna_2(3*newn,'.'), zuker_cai_bp_2(3*newn,'.');
+            string zuker_cai_rna_X_2(3*newn, '.');
+            Z2.get_rna_X(zuker_cai_rna_X_2);
+            Z2.get_rna_cai(zuker_cai_rna_2);
+            Z2.get_bp(zuker_cai_bp_2);
+
+            string zuker_cai_rna_c = zuker_cai_rna_1 + zuker_cai_rna_2;
+            string zuker_cai_rna_X_c = zuker_cai_rna_X_1 + zuker_cai_rna_X_2;
+            string zuker_cai_bp_c = zuker_cai_bp_1 + zuker_cai_bp_2;
+
+            double CAI_s_1 = evaluate_CAI(zuker_cai_rna_1,firstten,type);
+            double CAI_1 = evaluate_CAI(zuker_cai_rna_1,firstten,1);
+            double MFE_1 = evaluate_MFE(zuker_cai_rna_1);
+
+            double CAI_s_2 = evaluate_CAI(zuker_cai_rna_2,rest,type);
+            double CAI_2 = evaluate_CAI(zuker_cai_rna_2,rest,1);
+            double MFE_2 = evaluate_MFE(zuker_cai_rna_2);
+
+            double CAI_s_c = evaluate_CAI(zuker_cai_rna_c,protein,type);
+            double CAI_c = evaluate_CAI(zuker_cai_rna_c,protein,1);
+            double MFE_c = evaluate_MFE(zuker_cai_rna_c);
+
+            cout << "lambda: " << lambda << endl; 
+            cout << ",O_1: " << energy_cai_1 << ",cai_1: " << CAI_1 << ",cai_s_1: " << CAI_s_1 << ",mfe_1: " << MFE_1 << ",combined: " << lambda*MFE_1+(lambda-1)*CAI_1 << endl;
+            cout << ",O_2: " << energy_cai_2 << ",cai_2: " << CAI_2 << ",cai_s_2: " << CAI_s_2 << ",mfe_2: " << MFE_2 << ",combined: " << lambda*MFE_2+(lambda-1)*CAI_2 << endl;
+            cout << ",O_c (sum of above): " << energy_cai_1 + energy_cai_2 << ",cai_c: " << CAI_c << ",cai_s_c: " << CAI_s_c << ",mfe_c: " << MFE_c << ",combined: " << lambda*MFE_c+(lambda-1)*CAI_c << endl;
+            fout << "zuker cai bp 1: " << zuker_cai_bp_1 << ",size: " << zuker_cai_bp_1.size() << endl;
+            fout << "zuker cai bp 2: " << zuker_cai_bp_2 << ",size: " << zuker_cai_bp_2.size() << endl;
+            fout << "zuker cai concatenated: " << zuker_cai_bp_c << ",size: " << zuker_cai_bp_c.size() << endl; 
+            fout << "zuker rna 1: " << zuker_cai_rna_X_1 << ".size: " << zuker_cai_rna_1.size() << endl;
+            fout << "zuker rna 2: " << zuker_cai_rna_X_2 << ".size: " << zuker_cai_rna_2.size() << endl;
+            fout << "zuker rna concatenated: " << zuker_cai_rna_X_c << ",size: " << zuker_cai_rna_X_c.size() << endl;
+            fout << "zuker cai rna 1: " << zuker_cai_rna_1 << ".size: " << zuker_cai_rna_1.size() << endl;
+            fout << "zuker cai rna 1: " << zuker_cai_rna_2 << ".size: " << zuker_cai_rna_2.size() << endl;
+            fout << "zuker rna concatenated: " << zuker_cai_rna_c << ",size: " << zuker_cai_rna_c.size() << endl;
+            
+
+            fout << "Codon Adaptation Index 1: " << CAI_s_1 << endl;
+            fout << "Codon Adaptation Index 2: " << CAI_s_2 << endl;
+            fout << "Codon Adaptation Index C: " << CAI_s_c << endl;
+            fout << "Minimum Free Energy 1: " << MFE_1/100 << endl;
+            fout << "Minimum Free Energy 2: " << MFE_2/100 << endl;
+            fout << "Minimum Free Energy 3: " << MFE_c/100 << endl;
         }
         
     }
