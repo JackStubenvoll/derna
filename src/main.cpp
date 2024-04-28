@@ -331,7 +331,7 @@ int main(int argc, char *argv[]) {
             cout << "lambda: " << lambda << endl; 
             cout << ",O_1: " << energy_cai_1 << ",cai_1: " << CAI_1 << ",cai_s_1: " << CAI_s_1 << ",mfe_1: " << MFE_1 << ",combined: " << lambda*MFE_1+(lambda-1)*CAI_1 << endl;
             cout << ",O_2: " << energy_cai_2 << ",cai_2: " << CAI_2 << ",cai_s_2: " << CAI_s_2 << ",mfe_2: " << MFE_2 << ",combined: " << lambda*MFE_2+(lambda-1)*CAI_2 << endl;
-            cout << ",O_c (sum of above): " << energy_cai_1 + energy_cai_2 << ",cai_c: " << CAI_c << ",cai_s_c: " << CAI_s_c << ",mfe_c: " << MFE_c << ",combined: " << lambda*MFE_c+(lambda-1)*CAI_c << endl;
+            cout << ",O_3: (sum of above): " << energy_cai_1 + energy_cai_2 << ",cai_c: " << CAI_c << ",cai_s_c: " << CAI_s_c << ",mfe_c: " << MFE_c << ",combined: " << lambda*MFE_c+(lambda-1)*CAI_c << endl;
             fout << "zuker cai bp 1: " << zuker_cai_bp_1 << ",size: " << zuker_cai_bp_1.size() << endl;
             fout << "zuker cai bp 2: " << zuker_cai_bp_2 << ",size: " << zuker_cai_bp_2.size() << endl;
             fout << "zuker cai concatenated: " << zuker_cai_bp_c << ",size: " << zuker_cai_bp_c.size() << endl; 
@@ -348,7 +348,7 @@ int main(int argc, char *argv[]) {
             fout << "Codon Adaptation Index C: " << CAI_s_c << endl;
             fout << "Minimum Free Energy 1: " << MFE_1/100 << endl;
             fout << "Minimum Free Energy 2: " << MFE_2/100 << endl;
-            fout << "Minimum Free Energy 3: " << MFE_c/100 << endl;
+            fout << "Minimum Free Energy C: " << MFE_c/100 << endl;
         }
         
     }

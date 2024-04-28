@@ -17,13 +17,13 @@ using namespace std;
 class Zuker {
 
     vector<int> Z;
-    vector<int> E;
-    vector<int> M;
-    vector<int> TM0;
+    vector<int> E; //overall energy
+    vector<int> M; //overall energy of multiloop
+    vector<int> TM0; // stores precalculated energy values
     vector<double> Z2,E2,M2,TM2;
     vector<double> Z_CAI,E_CAI,M_CAI,TM_CAI;
     vector<double> O;
-    vector<double> E1;
+    vector<double> E1; // will store flag-mediated MFE scores
     vector<double> M1;
     vector<double> TM;
     vector<int> OB, EB, MB;
@@ -37,6 +37,7 @@ class Zuker {
     vector<int> codon_selection;
     vector<int> start_index, index_offset;
     int n, minX, minY, last_idx;
+    int flag; // 1 or -1, will flip sign of MFE to minimize the amount of structure
     int e0;
     double e;
     vector<vector<int>> O_bt, E_bt, M_bt, TM_bt;
@@ -44,13 +45,15 @@ class Zuker {
 
 public:
     Zuker(int n, int,vector<int> &);
+    Zuker(int n, int,vector<int> &, int mflag);
     Zuker(const Zuker &);
     ~Zuker();
     void init_values();
 
     /**
      * Fill the vector Z where Z[i] stores the minimum free energy at i
-     *
+     * i is a combination of two possible nucleotides in the sequence
+     * 
      * @param ostream object for stdout
      * */
     int calculate_Z(ostream &);
@@ -59,7 +62,8 @@ public:
     /**
      * Fill the vector E where E[i] stores the minimum free energy at i
      * if the two positions mapped to i are eligible base pairs
-     *
+     * i is a combination of two possible nucleotides in the sequence
+     * 
      * @param ostream object for stdout
      * */
     void calculate_E();
@@ -69,7 +73,8 @@ public:
     /**
      * Fill the vector M where M[i] stores the minimum free energy of the
      * multiloop formed between the two positions mapped to i
-     *
+     * i is a combination of two possible nucleotides in the sequence
+     * 
      * @param a is the position index of the left amino acid in the protein seq
      * @param b is the position index of the right amino acid in the protein seq
      * @param x is a possible codon of the amino acid at position a
@@ -193,7 +198,8 @@ public:
 
     /**
      * Access vector Z given protein position, codon selection and codon index (a, b, i, j, x, y)
-     *
+     * Z stores the energy of any combination of possible nucleotides
+     * 
      * @param a is the position index of the left amino acid in the protein seq
      * @param b is the position index of the right amino acid in the protein seq
      * @param x is a possible codon of the amino acid at position a
@@ -205,7 +211,8 @@ public:
 
     /**
      * Access vector E given protein position, codon selection and codon index (a, b, i, j, x, y)
-     *
+     * E stores 
+     * 
      * @param a is the position index of the left amino acid in the protein seq
      * @param b is the position index of the right amino acid in the protein seq
      * @param x is a possible codon of the amino acid at position a
