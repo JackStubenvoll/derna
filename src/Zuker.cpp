@@ -69,6 +69,59 @@ Zuker::Zuker(int n, int mode, vector<int> & protein):protein(protein),n(n) {
     init_values();
 }
 
+Zuker::Zuker(int n, int mode, vector<int> & protein, int min_structure_f):protein(protein),n(n) {
+    start_index.resize(n*n, 0);
+    index_offset.resize(n*n, 0);
+    int idx = 0;
+    last_idx = 0;
+    min_structure_flag = min_structure_f;
+//    cnt = 0;
+    for (int a = 0; a < n; a++) {
+        for (int b = 0; b < n; b++) {
+            idx = n*a+b;
+            start_index[idx] = last_idx;
+            index_offset[idx] = n_codon[protein[a]] * n_codon[protein[b]];
+            last_idx += index_offset[idx] * 9;
+        }
+    }
+
+    if (mode == 1) {
+        Z.resize(last_idx, 0);
+        E.resize(last_idx, inf);
+        M.resize(last_idx, inf);
+        TM0.resize(last_idx,inf);
+        e0 = inf;
+    } else {
+        O.resize(last_idx, 0);
+        E1.resize(last_idx, inf);
+        M1.resize(last_idx, inf);
+        TM.resize(last_idx, inf);
+
+        Z2.resize(last_idx, 0);
+        E2.resize(last_idx, inf);
+        M2.resize(last_idx, inf);
+        TM2.resize(last_idx,inf);
+
+        Z_CAI.resize(last_idx, 0);
+        E_CAI.resize(last_idx, 0);
+        M_CAI.resize(last_idx, 0);
+        TM_CAI.resize(last_idx,0);
+        e = inf;
+    }
+    OB.resize(last_idx, 0);
+    EB.resize(last_idx, 0);
+    MB.resize(last_idx, 0);
+    O_bt.resize(last_idx);
+    E_bt.resize(last_idx);
+    M_bt.resize(last_idx);
+    TM_bt.resize(last_idx);
+    codon_selection.resize(n,-1);
+    minX = -1, minY = -1;
+
+
+    init_values();
+}
+
 //((X == 0 && Y == 3) || (X == 3 && Y == 0) || (X == 1 && Y == 2) || (X == 2 && Y == 1) || (X == 2 && Y == 3) || (X == 3 && Y == 2))
 void Zuker::init_values() {
     basepair.resize(16,0);
@@ -3999,6 +4052,25 @@ double Zuker::calculate_CAI_O(ostream & fout, double lambda) {
 
     return res;
 }
+
+
+    auto end = chrono::high_resolution_clock::now();
+    long time_take = chrono::duration_cast<chrono::seconds>(end - start).count();
+    fout << "Energy: " << Access_O(0,n-1,0,2,minX, minY)/100 << endl;
+    fout << "Time taken by DP is : " << time_take;
+    fout << "sec" << endl;
+
+    double res = Access_O(0,n-1,0,2,minX, minY);
+
+    mfe = Access_Z2(0,n-1,0,2,minX, minY);
+    cai = Z_CAI[index(0,n-1,0,2,minX, minY)];
+    fout << "lambda: " << lambda << ",O: " << res << ",mfe: " << mfe/lambda << ",cai: " << cai/(lambda-1) << ",combined: " << mfe +  cai << endl;
+
+
+    return res;
+}
+
+
 
 void Zuker::calculate_CAI_E(double lambda) {
     double min_energy = inf, energy = inf;
