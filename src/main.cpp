@@ -292,9 +292,8 @@ int main(int argc, char *argv[]) {
 
 
             double energy_cai_1 = Z1.calculate_CAI_O(fout, lambda);
-            cout << "cp1" << endl;
+
             Z1.traceback_B2(lambda);
-            cout << "cp2" << endl;
             string zuker_cai_rna_1(3*10,'.'), zuker_cai_bp_1(3*10,'.');
             string zuker_cai_rna_X_1(3*10, '.');
             Z1.get_rna_X(zuker_cai_rna_X_1);
@@ -341,7 +340,7 @@ int main(int argc, char *argv[]) {
             fout << "zuker rna concatenated: " << zuker_cai_rna_X_c << ",size: " << zuker_cai_rna_X_c.size() << endl;
             fout << "zuker cai rna 1: " << zuker_cai_rna_1 << ".size: " << zuker_cai_rna_1.size() << endl;
             fout << "zuker cai rna 1: " << zuker_cai_rna_2 << ".size: " << zuker_cai_rna_2.size() << endl;
-            fout << "zuker cai rna concatenated: " << zuker_cai_rna_c << ",size: " << zuker_cai_rna_c.size() << endl;
+            fout << "zuker rna concatenated: " << zuker_cai_rna_c << ",size: " << zuker_cai_rna_c.size() << endl;
             
 
             fout << "Codon Adaptation Index 1: " << CAI_s_1 << endl;

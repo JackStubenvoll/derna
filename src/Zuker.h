@@ -39,13 +39,11 @@ class Zuker {
     int n, minX, minY, last_idx;
     int e0;
     double e;
-    int min_structure_flag;
     vector<vector<int>> O_bt, E_bt, M_bt, TM_bt;
 
 
 public:
     Zuker(int n, int,vector<int> &);
-    Zuker(int n, int,vector<int> &, int min_structure_f);
     Zuker(const Zuker &);
     ~Zuker();
     void init_values();
@@ -90,7 +88,6 @@ public:
      *
      * @param ostream object for stdout
      * @param lambda is a weight between 0 and 1
-     * @param min_structure_flag is a flag (1 or -1) to maximize MFE instead of minimize
      * */
     double calculate_CAI_O(ostream &, double lambda);
 
