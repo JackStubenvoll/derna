@@ -165,6 +165,10 @@ extern unordered_map<string, int> pair2pos;
 
 extern double Tmeasure;       /* temperature of param measurements */
 
+// five prime initial sequences
+extern string initial_fiveprime_sequence;
+extern string initial_fiveprime_hairpin;
+
 void fill_stack(const string &filename, int data, char delimeter = ',');
 void fill_mismatch(const string &filename, int data, char delimeter = ',');
 void fill_intl11(const string &filename, int data, char delimeter = ',');

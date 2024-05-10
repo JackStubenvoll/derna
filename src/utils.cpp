@@ -253,13 +253,20 @@ int to_int(char a) {
     }
 }
 
+char to_char(int b) {
+    switch (b) {
+        case 0: return 'A';
+        case 1: return 'C';
+        case 2: return 'G';
+        case 3: return 'U';
+        default:
+            cout << int(b) << endl;
+            throw invalid_argument("invalid argument to convert to number");
+    }
+}
+
 void char2num(vector<int>& target, string & s) {
     for (int i = 0; i < (int)s.size(); ++i) {
-        // if (i % 3 == 0) {
-        //     cout << endl;
-        // }
-        // cout << s[i] << " ";
-        
         target[i] = to_int(s[i]);
     }
 }
@@ -470,12 +477,74 @@ string generate_Five_Prime(double hairpin_energy, int hairpin_position) {
     // C - 1
     // G - 2
     // U - 3
+    if (hairpin_energy > 0) {
+        hairpin_energy *= -1;
+    }
+    if (hairpin_position < 0) {
+        hairpin_position *= -1;
+    }
     vector<vector<vector<vector<double>>>>  stacking(4, 
          vector<vector<vector<double>>> (4, 
               vector<vector<double>> (4, 
                  vector<double> (4, 0.0)))); // contains arrays of stacking energies
     fill_Stacking_Energies(stacking);
+    vector<vector<vector<vector<double>>>>  mismatch(4, 
+         vector<vector<vector<double>>> (4, 
+              vector<vector<double>> (4, 
+                 vector<double> (4, 0.0)))); // contains arrays of mismatch energies
+    fill_stack_mismatch_energies(mismatch);
+    // optimal GC content is around 50% in the stem
+    
+    string initial_sequence = initial_fiveprime_sequence;
+    string loop_sequence = initial_fiveprime_hairpin;
+    double MFE_val = -2.05;
+    double target_gc_content = 0.50;
+    int gc_count = 3;
+    int stem_length = 3;
+    double current_gc_content = 1.0;
+    double AU_end_penalty = 0.45;
+    int left_loop_end = 3;
+    int right_loop_end = 9;
+    while (MFE_val > hairpin_energy) {
+        //target optimal gc content by using (1 - current gc content) as a weight
+        double gc_weight = 1.0 - current_gc_content;
+        int l_nucleotide = to_int(loop_sequence[left_loop_end - 1]);
+        int r_nucleotide = to_int(loop_sequence[right_loop_end + 1]);
+        vector<vector<double>> tables = stacking[l_nucleotide][r_nucleotide];
+        double min_energy = tables[to_int('A')][to_int('A')];
+        vector<int> min_pair = {0, 0};
+        // find base pair that contributes the most stability, accounting for GC content
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                double temp_weight = 1.0;
+                if ((i == 1 && j == 2) || (i == 2 && j == 1)) {
+                    temp_weight = gc_weight;
+                }
+                double temp_energy = temp_weight * tables[i][j];
+                if (temp_energy < min_energy) {
+                    min_energy = temp_energy;
+                    min_pair = {i, j};
+                }
+            }
+        }
+        string left_char = string(1, to_char(min_pair[0]));
+        string right_char = string(1, to_char(min_pair[1]));
+        loop_sequence.insert(right_loop_end, right_char);
+        loop_sequence.insert(left_loop_end, left_char);
+        left_loop_end++;
+        right_loop_end++;
+        if ((left_char.compare(string(1, 'C')) && right_char.compare(string(1, 'G'))) ||
+            (left_char.compare(string(1, 'G')) && right_char.compare(string(1, 'C')))) {
+            gc_count++;
+        }
+        stem_length++;
+        current_gc_content = gc_count / stem_length;
 
+    }
+    // insert loop into sequence
+    initial_sequence.replace(initial_sequence.length() - hairpin_position - loop_sequence.length(), loop_sequence.length(), loop_sequence);
+    // now insert kozak sequence
+    // if (hairpin_position > )
 
     
 }
@@ -847,4 +916,38 @@ void fill_stack_mismatch_energies(vector<vector<vector<vector<double>>>> &initia
             initial_base_pairs[to_int('U')][to_int('U')][i][j] = 0;
         }
     }
+
+
+}
+
+double hairpin_size_penalty(double size) {
+    vector<double> size_penalty(31, 0.0);
+    size_penalty[3] =  5.4; 
+    size_penalty[4] =  5.6;
+    size_penalty[5] =  5.7;
+    size_penalty[6] =  5.4;
+    size_penalty[7] =  6.0;
+    size_penalty[8] =  5.5;
+    size_penalty[9] =  6.4;
+    size_penalty[10] = 6.5;
+    size_penalty[11] = 6.6;
+    size_penalty[12] = 6.7;
+    size_penalty[13] = 6.8;
+    size_penalty[14] = 6.9;
+    size_penalty[15] = 6.9;
+    size_penalty[16] = 7.0;
+    size_penalty[17] = 7.1;
+    size_penalty[18] = 7.1;
+    size_penalty[19] = 7.2;
+    size_penalty[20] = 7.2;
+    size_penalty[21] = 7.3;
+    size_penalty[22] = 7.3;
+    size_penalty[23] = 7.4;
+    size_penalty[24] = 7.4;
+    size_penalty[25] = 7.5;
+    size_penalty[26] = 7.5;
+    size_penalty[27] = 7.5;
+    size_penalty[28] = 7.6;
+    size_penalty[29] = 7.6;
+    size_penalty[30] = 7.7;
 }

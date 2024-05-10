@@ -19,6 +19,8 @@ char index_aa (int aa);
 
 int to_int(char a);
 
+char to_char(int b);
+
 void char2num(vector<int> &, string &);
 
 int n_index(char n);
@@ -89,6 +91,8 @@ string generate_Five_Prime(double hairpin_energy, int hairpin_position);
 void fill_Stacking_Energies(vector<vector<vector<vector<double>>>> &initial_base_pairs);
 
 void fill_stack_mismatch_energies(vector<vector<vector<vector<double>>>> &initial_base_pairs);
+
+double hairpin_size_penalty(int size);
 
 
 #endif //RNA_DESIGN_UTILS_H

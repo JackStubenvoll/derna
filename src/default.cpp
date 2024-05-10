@@ -35,6 +35,8 @@ PUBLIC int ninio37=60;
 PUBLIC int niniodH=320;
 PUBLIC int TerminalAU37=50;
 PUBLIC int TerminalAUdH=370;
+PUBLIC string initial_fiveprime_string = "CAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAA";
+PUBLIC string initial_fiveprime_hairpin = "CGCAAAAAAGCG";
 
 
 // loop length penalty based on loop type
