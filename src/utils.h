@@ -19,7 +19,7 @@ char index_aa (int aa);
 
 int to_int(char a);
 
-char to_char(int b);
+char to_base(int b);
 
 void char2num(vector<int> &, string &);
 

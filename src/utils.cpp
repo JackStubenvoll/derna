@@ -253,7 +253,7 @@ int to_int(char a) {
     }
 }
 
-char to_char(int b) {
+char to_base(int b) {
     switch (b) {
         case 0: return 'A';
         case 1: return 'C';
@@ -527,8 +527,8 @@ string generate_Five_Prime(double hairpin_energy, int hairpin_position) {
                 }
             }
         }
-        string left_char = string(1, to_char(min_pair[0]));
-        string right_char = string(1, to_char(min_pair[1]));
+        string left_char = string(1, to_base(min_pair[0]));
+        string right_char = string(1, to_base(min_pair[1]));
         loop_sequence.insert(right_loop_end, right_char);
         loop_sequence.insert(left_loop_end, left_char);
         left_loop_end++;
