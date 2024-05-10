@@ -349,6 +349,8 @@ void help()
     printf(" -p -- threshold tau2 <(0,1)>\n");
     printf(" -c -- codon usage table file path\n");
     printf(" -d -- directory to energy parameters\n");
+    printf(" -b -- <0, 1>, 0 to not treat first ten codons differently, 1 to reduce structure\n");
+    printf(" -f -- <0, 1>, 0 to not generate the 5' UTR, 1 to generate it\n");
     printf(" ...\n");
 }
 
@@ -461,4 +463,388 @@ int evaluate_BP_N(string & rna, int g) {
     int bp = F.nussinov(0, l-1);
     return bp;
 
+}
+
+string generate_Five_Prime(double hairpin_energy, int hairpin_position) {
+    // A - 0
+    // C - 1
+    // G - 2
+    // U - 3
+    vector<vector<vector<vector<double>>>>  stacking(4, 
+         vector<vector<vector<double>>> (4, 
+              vector<vector<double>> (4, 
+                 vector<double> (4, 0.0)))); // contains arrays of stacking energies
+    fill_Stacking_Energies(stacking);
+
+
+    
+}
+
+void fill_Stacking_Energies(vector<vector<vector<vector<double>>>> &initial_base_pairs) {
+    // AA
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('A')][to_int('A')][i][j] = 0;
+        }
+    }
+
+    // AC
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('A')][to_int('C')][i][j] = 0;
+        }
+    }
+    // AG
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('A')][to_int('G')][i][j] = 0;
+        }
+    }
+    // AU
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('A')][to_int('A')] = 0;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('A')][to_int('C')] = 0;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('A')][to_int('G')] = 0;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('A')][to_int('U')] = -0.9;
+
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('C')][to_int('A')] = 0;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('C')][to_int('C')] = 0;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('C')][to_int('G')] = -2.2;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('C')][to_int('U')] = 0;
+
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('G')][to_int('A')] = 0;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('G')][to_int('C')] = -2.1;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('G')][to_int('G')] = 0;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('G')][to_int('U')] = -0.6;
+
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('U')][to_int('A')] = -1.1;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('U')][to_int('C')] = 0;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('U')][to_int('G')] = -1.4;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('U')][to_int('U')] = 0;
+    // CA
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('C')][to_int('A')][i][j] = 0;
+        }
+    }
+    // CC
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('C')][to_int('C')][i][j] = 0;
+        }
+    }
+    // CG
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('A')][to_int('A')] = 0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('A')][to_int('C')] = 0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('A')][to_int('G')] = 0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('A')][to_int('U')] = -2.1;
+
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('C')][to_int('A')] = 0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('C')][to_int('C')] = 0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('C')][to_int('G')] = -3.3;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('C')][to_int('U')] = 0;
+
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('G')][to_int('A')] = 0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('G')][to_int('C')] = -2.4;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('G')][to_int('G')] = 0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('G')][to_int('U')] = -1.4;
+
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('U')][to_int('A')] = -2.1;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('U')][to_int('C')] = 0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('U')][to_int('G')] = -2.1;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('U')][to_int('U')] = 0;
+    // CU
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('C')][to_int('U')][i][j] = 0;
+        }
+    }
+    // GA
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('G')][to_int('A')][i][j] = 0;
+        }
+    }
+    // GC
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('A')][to_int('A')] = 0;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('A')][to_int('C')] = 0;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('A')][to_int('G')] = 0;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('A')][to_int('U')] = -2.4;
+
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('C')][to_int('A')] = 0;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('C')][to_int('C')] = 0;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('C')][to_int('G')] = -3.4;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('C')][to_int('U')] = 0;
+
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('G')][to_int('A')] = 0;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('G')][to_int('C')] = -3.3;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('G')][to_int('G')] = 0;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('G')][to_int('U')] = -1.5;
+
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('U')][to_int('A')] = -2.2;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('U')][to_int('C')] = 0;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('U')][to_int('G')] = -2.5;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('U')][to_int('U')] = 0;
+    // GG
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('G')][to_int('G')][i][j] = 0;
+        }
+    }
+    // GU
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('A')][to_int('A')] = 0;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('A')][to_int('C')] = 0;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('A')][to_int('G')] = 0;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('A')][to_int('U')] = -1.3;
+
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('C')][to_int('A')] = 0;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('C')][to_int('C')] = 0;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('C')][to_int('G')] = -2.5;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('C')][to_int('U')] = 0;
+
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('G')][to_int('A')] = 0;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('G')][to_int('C')] = -2.1;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('G')][to_int('G')] = 0;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('G')][to_int('U')] = -0.5;
+
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('U')][to_int('A')] = -1.4;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('U')][to_int('C')] = 0;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('U')][to_int('G')] = 1.3;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('U')][to_int('U')] = 0;
+    // UA
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('A')][to_int('A')] = 0;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('A')][to_int('C')] = 0;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('A')][to_int('G')] = 0;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('A')][to_int('U')] = -1.3;
+
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('C')][to_int('A')] = 0;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('C')][to_int('C')] = 0;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('C')][to_int('G')] = -2.4;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('C')][to_int('U')] = 0;
+
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('G')][to_int('A')] = 0;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('G')][to_int('C')] = -2.1;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('G')][to_int('G')] = 0;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('G')][to_int('U')] = -1.0;
+
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('U')][to_int('A')] = -0.9;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('U')][to_int('C')] = 0;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('U')][to_int('G')] = -1.3;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('U')][to_int('U')] = 0;
+    // UC
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('U')][to_int('C')][i][j] = 0;
+        }
+    }
+    // UG
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('A')][to_int('A')] = 0;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('A')][to_int('C')] = 0;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('A')][to_int('G')] = 0;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('A')][to_int('U')] = -1.0;
+
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('C')][to_int('A')] = 0;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('C')][to_int('C')] = 0;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('C')][to_int('G')] = -1.5;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('C')][to_int('U')] = 0;
+
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('G')][to_int('A')] = 0;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('G')][to_int('C')] = -1.4;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('G')][to_int('G')] = 0;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('G')][to_int('U')] = 0.3;
+
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('U')][to_int('A')] = -0.6;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('U')][to_int('C')] = 0;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('U')][to_int('G')] = -0.5;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('U')][to_int('U')] = 0;
+    // UU
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('U')][to_int('U')][i][j] = 0;
+        }
+    }
+}
+
+void fill_stack_mismatch_energies(vector<vector<vector<vector<double>>>> &initial_base_pairs) {
+     // AA
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('A')][to_int('A')][i][j] = 0;
+        }
+    }
+
+    // AC
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('A')][to_int('C')][i][j] = 0;
+        }
+    }
+    // AG
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('A')][to_int('G')][i][j] = 0;
+        }
+    }
+    // AU
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('A')][to_int('A')] = -0.8;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('A')][to_int('C')] = -1.0;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('A')][to_int('G')] = -0.8;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('A')][to_int('U')] = -1.0;
+
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('C')][to_int('A')] = -0.6;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('C')][to_int('C')] = -0.7;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('C')][to_int('G')] = -0.6;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('C')][to_int('U')] = -0.7;
+
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('G')][to_int('A')] = -0.8;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('G')][to_int('C')] = -1.0;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('G')][to_int('G')] = -0.8;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('G')][to_int('U')] = -1.0;
+
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('U')][to_int('A')] = -0.6;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('U')][to_int('C')] = -0.8;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('U')][to_int('G')] = -0.6;
+    initial_base_pairs[to_int('A')][to_int('U')][to_int('U')][to_int('U')] = -0.8;
+    // CA
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('C')][to_int('A')][i][j] = 0;
+        }
+    }
+    // CC
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('C')][to_int('C')][i][j] = 0;
+        }
+    }
+    // CG
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('A')][to_int('A')] = -1.5;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('A')][to_int('C')] = -1.5;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('A')][to_int('G')] = -1.4;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('A')][to_int('U')] = -1.5;
+
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('C')][to_int('A')] = -1.0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('C')][to_int('C')] = -1.1;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('C')][to_int('G')] = -1.0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('C')][to_int('U')] = -0.8;
+
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('G')][to_int('A')] = -1.4;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('G')][to_int('C')] = -1.5;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('G')][to_int('G')] = -1.6;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('G')][to_int('U')] = -1.5;
+
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('U')][to_int('A')] = -1.0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('U')][to_int('C')] = -1.4;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('U')][to_int('G')] = -1.0;
+    initial_base_pairs[to_int('C')][to_int('G')][to_int('U')][to_int('U')] = -1.2;
+    // CU
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('C')][to_int('U')][i][j] = 0;
+        }
+    }
+    // GA
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('G')][to_int('A')][i][j] = 0;
+        }
+    }
+    // GC
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('A')][to_int('A')] = -1.1;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('A')][to_int('C')] = -1.5;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('A')][to_int('G')] = -1.3;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('A')][to_int('U')] = -1.5;
+
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('C')][to_int('A')] = -1.1;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('C')][to_int('C')] = -0.7;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('C')][to_int('G')] = -1.1;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('C')][to_int('U')] = -0.5;
+
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('G')][to_int('A')] = -1.6;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('G')][to_int('C')] = -1.5;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('G')][to_int('G')] = -1.4;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('G')][to_int('U')] = -1.5;
+
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('U')][to_int('A')] = -1.1;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('U')][to_int('C')] = -1.0;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('U')][to_int('G')] = -1.1;
+    initial_base_pairs[to_int('G')][to_int('C')][to_int('U')][to_int('U')] = -0.7;
+    // GG
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('G')][to_int('G')][i][j] = 0;
+        }
+    }
+    // GU
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('A')][to_int('A')] = -0.3;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('A')][to_int('C')] = -1.0;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('A')][to_int('G')] = -0.8;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('A')][to_int('U')] = -1.0;
+
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('C')][to_int('A')] = -0.6;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('C')][to_int('C')] = -0.7;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('C')][to_int('G')] = -0.6;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('C')][to_int('U')] = -0.7;
+
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('G')][to_int('A')] = -0.6;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('G')][to_int('C')] = -1.0;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('G')][to_int('G')] = -0.8;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('G')][to_int('U')] = -1.0;
+
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('U')][to_int('A')] = -0.6;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('U')][to_int('C')] = -0.8;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('U')][to_int('G')] = -0.6;
+    initial_base_pairs[to_int('G')][to_int('U')][to_int('U')][to_int('U')] = -0.6;
+    
+    // UA
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('A')][to_int('A')] = -1.0;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('A')][to_int('C')] = -0.8;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('A')][to_int('G')] = -1.1;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('A')][to_int('U')] = -0.8;
+
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('C')][to_int('A')] = -0.7;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('C')][to_int('C')] = -0.6;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('C')][to_int('G')] = -0.7;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('C')][to_int('U')] = -0.5;
+
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('G')][to_int('A')] = -1.1;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('G')][to_int('C')] = -0.8;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('G')][to_int('G')] = -1.2;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('G')][to_int('U')] = -0.8;
+
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('U')][to_int('A')] = -0.7;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('U')][to_int('C')] = -0.6;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('U')][to_int('G')] = -0.7;
+    initial_base_pairs[to_int('U')][to_int('A')][to_int('U')][to_int('U')] = -0.5;
+    // UC
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('U')][to_int('C')][i][j] = 0;
+        }
+    }
+    // UG
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('A')][to_int('A')] = -1.0;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('A')][to_int('C')] = -0.8;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('A')][to_int('G')] = -1.1;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('A')][to_int('U')] = -0.8;
+
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('C')][to_int('A')] = -0.7;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('C')][to_int('C')] = -0.6;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('C')][to_int('G')] = -0.7;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('C')][to_int('U')] = -0.5;
+
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('G')][to_int('A')] = -0.5;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('G')][to_int('C')] = -0.8;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('G')][to_int('G')] = -0.8;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('G')][to_int('U')] = -0.8;
+
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('U')][to_int('A')] = -0.7;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('U')][to_int('C')] = -0.6;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('U')][to_int('G')] = -0.7;
+    initial_base_pairs[to_int('U')][to_int('G')][to_int('U')][to_int('U')] = -0.5;
+    // UU
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            initial_base_pairs[to_int('U')][to_int('U')][i][j] = 0;
+        }
+    }
 }

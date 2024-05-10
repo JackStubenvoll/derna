@@ -84,5 +84,11 @@ int evaluate_BP_N(string &, int);
 void usage();
 void help();
 
+string generate_Five_Prime(double hairpin_energy, int hairpin_position);
+
+void fill_Stacking_Energies(vector<vector<vector<vector<double>>>> &initial_base_pairs);
+
+void fill_stack_mismatch_energies(vector<vector<vector<vector<double>>>> &initial_base_pairs);
+
 
 #endif //RNA_DESIGN_UTILS_H
