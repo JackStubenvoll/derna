@@ -182,7 +182,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (gen5prime == 2) {
-        cout << "before: " << target_gc_content << endl;
         string temp = generate_Five_Prime(fphpenergy, fphpposition, target_gc_content);
         fout << temp << endl;
         return 0;
@@ -280,9 +279,6 @@ int main(int argc, char *argv[]) {
             fout << "Codon Adaptation Index: " << CAI_s << endl;
             fout << "Minimum Free Energy: " << MFE/100 << endl;
         } else if (codonisolate) {
-            // for (auto & i : protein) {
-            //     cout << i << " "; 
-            // }
             vector<int> firstten(10);
             for (int i = 0; i < 10; i++) {
                 firstten[i] = protein[i];
@@ -292,19 +288,6 @@ int main(int argc, char *argv[]) {
             for (int i = 10; i < n; i++) {
                 rest[i-10] = protein[i];
             }
-            // copy(protein.begin(), protein.begin() + 10, firstten.begin());
-            // copy(protein.begin() + 10, protein.end(), rest.begin());
-            // std::cout << "firstten test" << std::endl;
-            // for (int i = 0; i < 10; i++) {
-            //     std::cout << firstten[i] << " ";
-            // }
-            // std::cout << std::endl;
-            // for (int i = 0; i < n - 10; i++) {
-            //     std::cout << index_aa(rest[i]) << " ";
-            // }
-            // for (auto & i : rest) {
-            //     cout << i << " "; 
-            // }
             fout << "first ten amino acids: ";
             for (auto & i : firstten) {
                 fout << index_aa(i);

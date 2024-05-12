@@ -180,7 +180,6 @@ double stand_getCAI(const vector<int> & rna, const vector<int> & protein) {
         for (int j = 0; j <= 2; j++) {
             codon[j] = rna[3*i+j];
         }
-//        cout << i << endl;
         int x = getxPos(p, codon);
         CAI_ans += codon_cai[p][x];
     }
@@ -408,8 +407,6 @@ vector<int> read_fasta(string & input, ostream& fout) {
 
 double evaluate_CAI(string & rna,vector<int> & protein,int type) {
     int l = int(rna.size());
-    // cout << "eval" << endl;
-//    cout << rna << endl;
     vector<int> seq(l);
     char2num(seq, rna);
     double CAI;
@@ -429,9 +426,6 @@ double evaluate_CAI(vector<int> & rna,vector<int> & protein) {
 
 double evaluate_MFE(string & rna) {
     int l = int(rna.size());
-
-//    cout << rna << endl;
-
     vector<int> seq(l);
     char2num(seq, rna);
     ZukerAlgorithm Zu = ZukerAlgorithm(seq,l);
@@ -504,14 +498,10 @@ string generate_Five_Prime(double hairpin_energy, int hairpin_position, double t
     double AU_end_penalty = 0.45;
     int left_loop_end = 3;
     int right_loop_end = 9;
-    cout << "target: " << target_gc_content << endl;
     while (MFE_val > hairpin_energy) {
-        // cout << loop_sequence.length() << " " << MFE_val << endl;
         //target optimal gc content by using (1 - current gc content) as a weight
         int l_nucleotide = to_int(loop_sequence[left_loop_end - 1]);
         int r_nucleotide = to_int(loop_sequence[right_loop_end]);
-        // cout << l_nucleotide << " " << r_nucleotide << endl;
-        // break;
         vector<vector<double>> tables = stacking[l_nucleotide][r_nucleotide];
         double min_energy = tables[to_int('A')][to_int('A')];
         double temp_min = 0.0;
@@ -525,17 +515,17 @@ string generate_Five_Prime(double hairpin_energy, int hairpin_position, double t
                     if (current_gc_content > target_gc_content) {
                         temp_weight = 0.0;
                     }
-                    // temp_weight = ((0.5 + target_gc_content) - current_gc_content);
-                    // cout << "temp_weight: " << temp_weight << endl;
+                    string prev2_left = loop_sequence.substr(left_loop_end - 2, 2);
+                    //can't have a premature AUG codon
+                    if (prev2_left == "AU") {
+                        temp_weight = 0.0;
+                    }
                 } else {
                     if (current_gc_content < target_gc_content) {
                         temp_weight = 0.0;
                     }
                 }
-                // cout << to_base(i) << to_base(j);
-                // cout << "raw energy: " << tables[i][j] << " ";
                 double temp_energy = temp_weight * tables[i][j];
-                // cout << "calc energy: " << temp_energy << endl;
                 if (temp_energy < temp_min) {
                     temp_min = temp_energy;
                     min_energy = tables[i][j];
@@ -543,7 +533,6 @@ string generate_Five_Prime(double hairpin_energy, int hairpin_position, double t
                 }
             }
         }
-        // cout << "min energy: " << temp_min << endl;
         string left_char = string(1, to_base(min_pair[0]));
         string right_char = string(1, to_base(min_pair[1]));
         loop_sequence.insert(right_loop_end, right_char);
@@ -554,20 +543,12 @@ string generate_Five_Prime(double hairpin_energy, int hairpin_position, double t
             (!left_char.compare(string(1, 'G')) || !right_char.compare(string(1, 'C')))) {
             gc_count++;
         }
-        // cout << "left char: " << left_char << "\t right char: " << right_char << endl;
         stem_length++;
-        // cout << gc_count << " " << stem_length << endl;
         current_gc_content = gc_count / (double)stem_length;
-        // cout << current_gc_content << endl;
-        // cout << target_gc_content / current_gc_content << endl;
-        // cout << current_gc_content / target_gc_content << "\n" << endl;
         MFE_val += min_energy;
 
     }
     // insert loop into sequence
-    cout << current_gc_content << endl;
-    cout << target_gc_content / current_gc_content << endl;
-    cout << current_gc_content / target_gc_content << "\n" << endl;
     if (loop_sequence.length() < (initial_sequence.length() - hairpin_position + 1)) {
         initial_sequence.replace(initial_sequence.length() - hairpin_position + 1 - loop_sequence.length(), loop_sequence.length(), loop_sequence);
     } else {
