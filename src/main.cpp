@@ -22,7 +22,10 @@ int main(int argc, char *argv[]) {
     string rna_file,swipe_output;
     string codon_file = {};
     string param_path = {};
-    int model = 1, mode = 1, codonisolate = 0;
+    int model = 1, mode = 1, codonisolate = 0, gen5prime = 0;
+    double fphpenergy = -20;
+    int fphpposition = 10;
+    double target_gc_content = 0.60;
     double incr = inf, lambda = inf, threshold = 0.0025, threshold2 = 0.00075;
     int g = inf;
 
@@ -80,6 +83,29 @@ int main(int argc, char *argv[]) {
                         // only functionality is currently for zuker + mfe_cai
                         codonisolate = std::stoi(argv[i+1]);
                         break;
+                    case 'f':
+                        //controls whether or not to prepend 5' UTR sequence
+                        gen5prime = std::stoi(argv[i+1]);
+                        //optional parameters to select 5' UTR sequence
+                        if (i + 3 >= argc) {
+                            break;
+                        }
+                        if (!isalpha(argv[i+2][1])) {
+                            fphpenergy = stoi(argv[i+2]);
+                            fphpposition = stoi(argv[i+3]);
+                            if (i + 4 >= argc) {
+                                i += 2;
+                                break;
+                            }
+                            if (!isalpha(argv[i+4][1])) {
+                                target_gc_content = stod(argv[i+4]);
+                                i+=3;
+                                break;
+                            }
+                            i+=2;
+                            break;
+                        }
+                        break;
                     default:
                         help();
                         return(0);
@@ -93,7 +119,7 @@ int main(int argc, char *argv[]) {
         help();
         return -1;
     }
-
+    
     bool nussinov = false;
     bool zuker = false;
     bool test = false;
@@ -155,7 +181,12 @@ int main(int argc, char *argv[]) {
             throw invalid_argument("Invalid Input for Mode");
     }
 
-
+    if (gen5prime == 2) {
+        cout << "before: " << target_gc_content << endl;
+        string temp = generate_Five_Prime(fphpenergy, fphpposition, target_gc_content);
+        fout << temp << endl;
+        return 0;
+    }
 
     if (input.empty()) throw invalid_argument("Input File Needed");
 
@@ -164,7 +195,6 @@ int main(int argc, char *argv[]) {
     fout << endl;
     double n_res = 0;
     string rna;
-
 
     if (nussinov && mfe) {
         if (g == inf) throw invalid_argument("Invalid Value of g");
@@ -349,6 +379,7 @@ int main(int argc, char *argv[]) {
             fout << "Minimum Free Energy 1: " << MFE_1/100 << endl;
             fout << "Minimum Free Energy 2: " << MFE_2/100 << endl;
             fout << "Minimum Free Energy C: " << MFE_c/100 << endl;
+            rna = zuker_cai_rna_c;
         }
         
     }
@@ -364,6 +395,13 @@ int main(int argc, char *argv[]) {
         Zuker Z = Zuker(n,mode,protein);
         Z.lambda_swipe(incr,fout,swipe_output);
     }
+
+    if (gen5prime) {
+        string fiveprime = generate_Five_Prime(fphpenergy, fphpposition, target_gc_content);
+        fout << "five prime seqeunce: " << fiveprime << endl;
+        fout << "end sequence: " << fiveprime << rna << endl;
+
+    } 
 
     return 0;
 }

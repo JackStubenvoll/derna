@@ -86,7 +86,7 @@ int evaluate_BP_N(string &, int);
 void usage();
 void help();
 
-string generate_Five_Prime(double hairpin_energy, int hairpin_position);
+string generate_Five_Prime(double hairpin_energy, int hairpin_position, double target_gc_content);
 
 void fill_Stacking_Energies(vector<vector<vector<vector<double>>>> &initial_base_pairs);
 

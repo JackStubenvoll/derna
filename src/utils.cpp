@@ -472,7 +472,7 @@ int evaluate_BP_N(string & rna, int g) {
 
 }
 
-string generate_Five_Prime(double hairpin_energy, int hairpin_position) {
+string generate_Five_Prime(double hairpin_energy, int hairpin_position, double target_gc_content) {
     // A - 0
     // C - 1
     // G - 2
@@ -495,56 +495,92 @@ string generate_Five_Prime(double hairpin_energy, int hairpin_position) {
     fill_stack_mismatch_energies(mismatch);
     // optimal GC content is around 50% in the stem
     
-    string initial_sequence = initial_fiveprime_sequence;
-    string loop_sequence = initial_fiveprime_hairpin;
+    string initial_sequence = "CAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAACAA";
+    string loop_sequence = "CGCAAAAAAGCG";
     double MFE_val = -2.05;
-    double target_gc_content = 0.50;
     int gc_count = 3;
     int stem_length = 3;
     double current_gc_content = 1.0;
     double AU_end_penalty = 0.45;
     int left_loop_end = 3;
     int right_loop_end = 9;
+    cout << "target: " << target_gc_content << endl;
     while (MFE_val > hairpin_energy) {
+        // cout << loop_sequence.length() << " " << MFE_val << endl;
         //target optimal gc content by using (1 - current gc content) as a weight
-        double gc_weight = 1.0 - current_gc_content;
         int l_nucleotide = to_int(loop_sequence[left_loop_end - 1]);
-        int r_nucleotide = to_int(loop_sequence[right_loop_end + 1]);
+        int r_nucleotide = to_int(loop_sequence[right_loop_end]);
+        // cout << l_nucleotide << " " << r_nucleotide << endl;
+        // break;
         vector<vector<double>> tables = stacking[l_nucleotide][r_nucleotide];
         double min_energy = tables[to_int('A')][to_int('A')];
+        double temp_min = 0.0;
         vector<int> min_pair = {0, 0};
         // find base pair that contributes the most stability, accounting for GC content
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 double temp_weight = 1.0;
-                if ((i == 1 && j == 2) || (i == 2 && j == 1)) {
-                    temp_weight = gc_weight;
+                // double temp_weight = (0.5 + (1.0 - target_gc_content)) - (1.0 - current_gc_content);
+                if (i == 1 || i == 2 || j == 1 || j == 2) {
+                    if (current_gc_content > target_gc_content) {
+                        temp_weight = 0.0;
+                    }
+                    // temp_weight = ((0.5 + target_gc_content) - current_gc_content);
+                    // cout << "temp_weight: " << temp_weight << endl;
+                } else {
+                    if (current_gc_content < target_gc_content) {
+                        temp_weight = 0.0;
+                    }
                 }
+                // cout << to_base(i) << to_base(j);
+                // cout << "raw energy: " << tables[i][j] << " ";
                 double temp_energy = temp_weight * tables[i][j];
-                if (temp_energy < min_energy) {
-                    min_energy = temp_energy;
+                // cout << "calc energy: " << temp_energy << endl;
+                if (temp_energy < temp_min) {
+                    temp_min = temp_energy;
+                    min_energy = tables[i][j];
                     min_pair = {i, j};
                 }
             }
         }
+        // cout << "min energy: " << temp_min << endl;
         string left_char = string(1, to_base(min_pair[0]));
         string right_char = string(1, to_base(min_pair[1]));
         loop_sequence.insert(right_loop_end, right_char);
         loop_sequence.insert(left_loop_end, left_char);
         left_loop_end++;
         right_loop_end++;
-        if ((left_char.compare(string(1, 'C')) && right_char.compare(string(1, 'G'))) ||
-            (left_char.compare(string(1, 'G')) && right_char.compare(string(1, 'C')))) {
+        if ((!left_char.compare(string(1, 'C')) || !right_char.compare(string(1, 'G'))) ||
+            (!left_char.compare(string(1, 'G')) || !right_char.compare(string(1, 'C')))) {
             gc_count++;
         }
+        // cout << "left char: " << left_char << "\t right char: " << right_char << endl;
         stem_length++;
-        current_gc_content = gc_count / stem_length;
+        // cout << gc_count << " " << stem_length << endl;
+        current_gc_content = gc_count / (double)stem_length;
+        // cout << current_gc_content << endl;
+        // cout << target_gc_content / current_gc_content << endl;
+        // cout << current_gc_content / target_gc_content << "\n" << endl;
+        MFE_val += min_energy;
 
     }
     // insert loop into sequence
-    initial_sequence.replace(initial_sequence.length() - hairpin_position - loop_sequence.length(), loop_sequence.length(), loop_sequence);
-    // now insert kozak sequence
-    // if (hairpin_position > )
+    cout << current_gc_content << endl;
+    cout << target_gc_content / current_gc_content << endl;
+    cout << current_gc_content / target_gc_content << "\n" << endl;
+    if (loop_sequence.length() < (initial_sequence.length() - hairpin_position + 1)) {
+        initial_sequence.replace(initial_sequence.length() - hairpin_position + 1 - loop_sequence.length(), loop_sequence.length(), loop_sequence);
+    } else {
+        initial_sequence = "CAA" + loop_sequence + "CAACAACAA";
+    }
+    
+    // now insert kozak sequence (GCCRCC *AUG* G)
+    string kozak = "GCCGCC";
+    if (hairpin_position > 6) {
+        initial_sequence.replace(initial_sequence.length() - 6, 6, kozak);
+    }
+
+    return initial_sequence;
 
     
 }
@@ -950,4 +986,5 @@ double hairpin_size_penalty(double size) {
     size_penalty[28] = 7.6;
     size_penalty[29] = 7.6;
     size_penalty[30] = 7.7;
+    return size_penalty[size];
 }
