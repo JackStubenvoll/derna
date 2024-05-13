@@ -517,10 +517,16 @@ string generate_Five_Prime(double hairpin_energy, int hairpin_position, double t
                     }
                     string prev2_left = loop_sequence.substr(left_loop_end - 2, 2);
                     //can't have a premature AUG codon
-                    if (prev2_left == "AU") {
+                    if (prev2_left == "AU" && i == 2) {
+                        cout << prev2_left;
                         temp_weight = 0.0;
                     }
                 } else {
+                    string next2_right = loop_sequence.substr(right_loop_end, 2);
+                    //can't have a premature AUG codon
+                    if (next2_right == "UG" && j == 0) {
+                        temp_weight = 0.0;
+                    }
                     if (current_gc_content < target_gc_content) {
                         temp_weight = 0.0;
                     }
